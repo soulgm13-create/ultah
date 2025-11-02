@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sweet Seventeen!</title>
+    <style>
+        :root{
+            --bg1:#8b0000; /* dark red */
+            --bg2:#ff4d4d; /* light red */
+            --accent:#ffd166;
+            --glass: rgba(255,255,255,0.08);
+        }
+        html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+        body{
+            background: linear-gradient(180deg,var(--bg1), var(--bg2));
+            display:flex;align-items:center;justify-content:center;overflow:hidden;color:#fff;
+        }
+        
+        /* Main card */
+        .card{
+            width:min(960px,92vw);
+            min-height:60vh;
+            padding:36px;
+            border-radius:20px;
+            backdrop-filter: blur(6px) saturate(120%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+            position:relative;
+            overflow:hidden;
+            text-align:center;
+        }
+
+        h1{
+            margin:28px 0 6px 0;font-size: clamp(28px, 6vw, 56px); letter-spacing:1px;
+            text-shadow: 0 6px 18px rgba(0,0,0,0.5);
+        }
+        p.lead{margin:0;font-size:clamp(14px,2.5vw,20px);opacity:0.95}
+
+        /* Lantern (lampion) styles */
+        .lantern{
+            position:absolute;top:10%;left:50%;width:56px;height:84px;transform-origin:center top;opacity:0;pointer-events:none;
+            filter: drop-shadow(0 8px 18px rgba(0,0,0,0.45));
+        }
+
+        /* lantern SVG colored by currentColor */
+        .lantern svg{width:100%;height:100%;display:block}
+
+        /* animate the appearance then slow fade away */
+        @keyframes lantern-entrance{
+            0%{opacity:0; transform: translateY(0) scale(0.5);}
+            20%{opacity:1; transform: translateY(-6px) scale(1.02);}
+            60%{opacity:1; transform: translateY(-10px) scale(1);}
+            100%{opacity:0; transform: translateY(-30px) scale(0.8);}
+        }
+
+        /* random gentle sway (not directly used by JS, but kept for context) */
+        @keyframes sway{
+            0%{transform: rotate(-6deg)}
+            50%{transform: rotate(6deg)}
+            100%{transform: rotate(-6deg)}
+        }
+
+        .lantern.show{
+            animation: lantern-entrance 4s cubic-bezier(.2,.9,.3,1) forwards;
+        }
+
+        .lantern .glow{
+            mix-blend-mode: screen; filter: blur(8px);opacity:0.9;
+        }
+
+        /* Floating confetti dots */
+        .confetti{position:absolute;inset:0;pointer-events:none}
+        .confetti .dot{position:absolute;border-radius:50%;width:10px;height:10px;opacity:0.9;transform:translateY(0);}
+
+        /* small floating sparkle */
+        .sparkle{position:absolute; width:6px;height:6px;border-radius:50%;opacity:0.0;transform:scale(0.6);}
+
+        /* button */
+        .btn{
+            display:inline-block;margin-top:22px;padding:12px 22px;border-radius:999px;background:linear-gradient(90deg,var(--accent), #fff3c4);color:#5b2b00;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* small responsive footer */
+        .small{position:absolute;right:16px;bottom:14px;font-size:12px;opacity:0.7}
+
+        /* responsive adjustments */
+        @media (max-width:520px){
+            .card{padding:20px;border-radius:14px}
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <div style="position:relative;z-index:2">
+            <h1>Selamat Ulang Tahun!</h1>
+            <p class="lead">Selamat ulang tahun acha, semoga tetep cantik, sehat, pinter, dan selalu bisa jadi inspirasi buat orang sekitar. Terima kasih juga udah pernah menjadi orang ternyaman di hidupku, dan ku harap semua impian mu bisa tercapai dengan bahagia. Satu lagi tolong jangan terlalu memaksakan diri mu, kalo kamu lelah istirahatlah jangan sampai kamu kecapean sama diri mu sendiri. Bahagia terus yaa sama siapapun itu, banyak temen disekitar mu yang merasa bahagia ada kamu disisinya. Dan maaf belom bisa jadi yang terbaik buat kamu.
+Maaf kalo misal kurang menarik soalnya bikinnya cuman modal ingetan waktu ikut les dulu sama bantuan temen, dan jujur bikin kalimatnya sambil nahan air mata keluar but im oke.</p>
+            <a class="btn" href="#" id="btn">Pencet Biar Meriah 🎆</a>
+        </div>
+        <div id="lantern-area" aria-hidden="true"></div>
+
+        <div class="confetti" id="confetti"></div>
+
+        <div class="small">teman baik Anggaa</div>
+
+    </div>
+    
+    <template id="lantern-template">
+        <div class="lantern" role="img" aria-label="Lampion">
+            <svg viewBox="0 0 64 96" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="g1" cx="30%" cy="20%">
+                        <stop offset="0%" stop-color="#fff" stop-opacity="0.9" />
+                        <stop offset="100%" stop-color="#ffcf9b" stop-opacity="0" />
+                    </radialGradient>
+                </defs>
+                <g transform="translate(4,4)">
+                    <ellipse cx="28" cy="20" rx="20" ry="18" fill="currentColor" />
+                    <path d="M8 20 C8 40, 48 40, 48 20 L48 60 C48 76,8 76,8 60 Z" fill="currentColor" />
+                    <rect x="24" y="60" width="8" height="12" fill="#8b3e00" rx="2" />
+                    <ellipse cx="18" cy="16" rx="8" ry="6" fill="url(#g1)" opacity="0.6"/>
+                    <circle class="glow" cx="28" cy="34" r="24" fill="rgba(255,200,120,0.06)" />
+                </g>
+            </svg>
+        </div>
+    </template>
+    
+    <script>
+        const lanternArea = document.getElementById('lantern-area');
+        const template = document.getElementById('lantern-template');
+        const confetti = document.getElementById('confetti');
+
+        // helper: random between
+        const rnd = (min,max)=> Math.random()*(max-min)+min;
+
+        function createLantern(index){
+            const clone = template.content.firstElementChild.cloneNode(true);
+            // pick a red/orange shade
+            const colors = ['#ff4d4d','#ff6b4d','#ff9a76','#ff7f50','#ff5e99'];
+            const color = colors[Math.floor(Math.random()*colors.length)];
+            clone.style.color = color; // sets currentColor for svg
+
+            // random horizontal position within card
+            const x = rnd(6, 92); // percent
+            const y = rnd(6, 30);
+            clone.style.left = x + '%';
+            clone.style.top = y + '%';
+            
+            // PERBAIKAN: Menggunakan backticks dan mengatur rotasi awal
+            const initialRotation = rnd(-8, 8);
+            clone.style.transform = `translateX(-50%) rotate(${initialRotation}deg)`;
+
+            // small random delay so they don't all animate exactly same time
+            const delay = rnd(0,0.8);
+            clone.style.animationDelay = delay + 's';
+
+            // Menambahkan kelas untuk memicu animasi CSS (lantern-entrance)
+            clone.classList.add('show'); 
+
+            // add small inline sway using Web Animation API
+            // Rotasi berulang untuk efek goyangan
+            clone.animate([
+                { transform: `translateX(-50%) rotate(${initialRotation - 6}deg)` },
+                { transform: `translateX(-50%) rotate(${initialRotation + 6}deg)` },
+                { transform: `translateX(-50%) rotate(${initialRotation - 6}deg)` }
+            ],{duration: rnd(2400,4400), iterations: Infinity, easing: 'ease-in-out'});
+
+            // append and return
+            lanternArea.appendChild(clone);
+
+            // remove after animation finishes (4s + delay)
+            setTimeout(()=>{
+                clone.remove();
+            }, (4000 + delay*1000));
+        }
+
+        // create several lanterns on load
+        function showLanterns(count = 7){
+            for(let i=0;i<count;i++){
+                setTimeout(()=>createLantern(i), i*120);
+            }
+        }
+
+        // confetti generator (soft dots)
+        function burstConfetti(n=18){
+            for(let i=0;i<n;i++){
+                const d = document.createElement('div');
+                d.className = 'dot';
+                const size = Math.floor(rnd(6,14));
+                d.style.width = d.style.height = size+'px';
+                d.style.left = rnd(6,94)+'%';
+                d.style.top = rnd(12,80)+'%';
+                
+                // PERBAIKAN: Menggunakan backticks untuk background CSS
+                d.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), transparent 40%), hsl(${Math.floor(rnd(10,50))}deg ${Math.floor(rnd(70,95))}% ${Math.floor(rnd(45,60))}% )`;
+                
+                d.style.opacity = 0.0;
+                confetti.appendChild(d);
+                // animate appearance and fade
+                const dur = rnd(1200,2600);
+                d.animate([
+                    // PERBAIKAN: Menggunakan backticks pada properti transform
+                    { transform: `translateY(12px) scale(0.7)`, opacity:0 },
+                    { transform: `translateY(-6px) scale(1.05)`, opacity:1 },
+                    { transform: `translateY(-18px) scale(1)`, opacity:0 }
+                ],{duration:dur, easing:'cubic-bezier(.2,.9,.3,1)'});
+                setTimeout(()=>d.remove(), dur+100);
+            }
+        }
+
+        // play initial show
+        window.addEventListener('load', ()=>{
+            // small delay to let page settle
+            setTimeout(()=>{
+                showLanterns(8);
+                burstConfetti(22);
+                // second quieter wave
+                setTimeout(()=>{ showLanterns(5); }, 1200);
+            },180);
+        });
+
+        // also attach to button for repeatable fun
+        document.getElementById('btn').addEventListener('click', (e)=>{
+            e.preventDefault();
+            showLanterns(10);
+            burstConfetti(30);
+        });
+    </script>
+</body>
+</html>
